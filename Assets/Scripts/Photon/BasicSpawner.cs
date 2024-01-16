@@ -12,7 +12,10 @@ public class BasicSpawner : NinjaMonoBehaviour, INetworkRunnerCallbacks {
     private NetworkRunner _runner;
     [SerializeField] private NetworkPrefabRef _playerPrefab;
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
-
+    private bool _mouseButton0;
+    void Update() {
+        _mouseButton0 = _mouseButton0 | Input.GetMouseButton(0);
+    }
     async void StartGame(GameMode mode) {
         // Create the Fusion runner and let it know that we will be providing user input
         _runner = gameObject.AddComponent<NetworkRunner>();
@@ -96,6 +99,9 @@ public class BasicSpawner : NinjaMonoBehaviour, INetworkRunnerCallbacks {
             data.direction += Vector3.right;
 
         logd(logId, "Input Runner=" + runner.logf() + " Setting Data=" + data.logf() + " to NetworkInput=" + input.logf(), true);
+
+        data.buttons.Set(NetworkInputData.MOUSEBUTTON0, _mouseButton0);
+        _mouseButton0 = false;
 
         input.Set(data);
 
