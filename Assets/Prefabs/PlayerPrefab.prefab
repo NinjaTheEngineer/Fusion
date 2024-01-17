@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 36bce9ab6cae8ce43962938466458044, type: 2}
+  - {fileID: 2100000, guid: aeee7071bea0a4c478b4fea5933c5f79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -170,7 +170,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 8d530ffe6c4968843806085897955b9d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -265,6 +265,8 @@ MonoBehaviour:
   _prefabBall: {fileID: -5569231692423372246, guid: 730f171aaeaafce49b63f8cbae4fcbb9, type: 3}
   ballInitImpulse: 10
   ballSpawnDelay: 0.25
+  _material: {fileID: 0}
+  _spawned: 0
   movementSpeed: 5
 --- !u!114 &6456657854735571401
 MonoBehaviour:
