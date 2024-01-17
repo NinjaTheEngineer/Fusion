@@ -1,6 +1,7 @@
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using static NinjaTools.Utils;
 public class Player : NetworkBehaviour {
@@ -24,11 +25,17 @@ public class Player : NetworkBehaviour {
     NetworkCharacterController _cc;
     Vector3 _forward = Vector3.forward;
 
-    public float movementSpeed = 5f;
+    public float movementSpeed = 5f; 
+    private TMP_Text _messages;
     void Awake() {
         _material = GetComponentInChildren<MeshRenderer>().material;
         _cc = GetComponent<NetworkCharacterController>();
         _forward = transform.forward;
+    }
+    private void Update() {
+        if(Object.HasInputAuthority && Input.GetKeyDown(KeyCode.R)) {
+            RPC_SendMessage("Hey Mate");
+        }
     }
     public override void FixedUpdateNetwork() {
 
@@ -51,6 +58,18 @@ public class Player : NetworkBehaviour {
                 SpawnPhysxBall();
             }
         }
+    }
+    public override void Render() {
+        var logId = "Render";
+        foreach (var change in _changeDetector.DetectChanges(this)) {
+            logd(logId, $"Change: {change}");
+            switch (change) {
+                case nameof(spawned):
+                    _material.color = Color.white;
+                    break;
+            }
+        }
+        _material.color = Color.Lerp(_material.color, Color.blue, Time.deltaTime);
     }
     public void SpawnPhysxBall() {
         var logId = "SpawnPhysxBall";
@@ -78,16 +97,23 @@ public class Player : NetworkBehaviour {
                     });
         spawned = !spawned;
     }
-    public override void Render() {
-        var logId = "Render";
-        foreach (var change in _changeDetector.DetectChanges(this)) {
-            logd(logId, $"Change: {change}");
-            switch (change) {
-                case nameof(spawned):
-                    _material.color = Color.white;
-                    break;
-            }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    public void RPC_SendMessage(string message, RpcInfo info = default) {
+        RPC_RelayMessage(message, info.Source);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    public void RPC_RelayMessage(string message, PlayerRef messageSource) {
+        if (_messages == null)
+            _messages = FindObjectOfType<TMP_Text>();
+
+        if (messageSource == Runner.LocalPlayer) {
+            message = $"You said: {message}\n";
+        } else {
+            message = $"Some other player said: {message}\n";
         }
-        _material.color = Color.Lerp(_material.color, Color.blue, Time.deltaTime);
+
+        _messages.text += message;
     }
 }
