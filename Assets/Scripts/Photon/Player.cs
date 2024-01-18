@@ -1,21 +1,36 @@
 using Fusion;
+using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using static NinjaTools.Utils;
+public enum AnimState {
+    Idle = 0, Walk = 1, Run = 2, Jump = 3, Fall = 4, Land = 5, Crouch = 6, CrouchWalk = 7
+}
+
 public class Player : NetworkBehaviour {
 
     [SerializeField] PhysxBall _prefabPhysxBall;
     [SerializeField] Ball _prefabBall;
+    [SerializeField] ParticleSystem _shotFX;
+    [SerializeField] Animator _anim;
 
     [SerializeField] float ballInitImpulse = 10f;
     [SerializeField] float ballSpawnDelay = 0.25f;
 
-    public Material _material;
+    //public Material _material;
 
     [Networked]
     public bool spawned { get; set; }
+
+    AnimState _animState;
+    [Networked]
+    public int animState { get; set; }
+
+    [Networked]
+    public float velocity { get; set; }
+
     private ChangeDetector _changeDetector;
     public override void Spawned() {
         _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
@@ -28,7 +43,7 @@ public class Player : NetworkBehaviour {
     public float movementSpeed = 5f; 
     private TMP_Text _messages;
     void Awake() {
-        _material = GetComponentInChildren<MeshRenderer>().material;
+        //_material = GetComponentInChildren<MeshRenderer>().material;
         _cc = GetComponent<NetworkCharacterController>();
         _forward = transform.forward;
     }
@@ -50,6 +65,19 @@ public class Player : NetworkBehaviour {
             if (!HasStateAuthority || !delay.ExpiredOrNotRunning(Runner)) {
                 return;
             }
+            var ccVelocity = _cc.Velocity;
+            if(animState!=(int)AnimState.Idle && ccVelocity.sqrMagnitude <= 0.14f) {
+                animState = (int)AnimState.Idle;
+                _animState = AnimState.Idle;
+            }
+            if (animState!=(int)AnimState.Run && ccVelocity.sqrMagnitude >= 0.15f) {
+                animState = (int)AnimState.Run;
+                _animState = AnimState.Run;
+            }
+            if(animState==(int)AnimState.Run) {
+                velocity = ccVelocity.magnitude;
+            }
+            logd("FixedUpdateNetwork", $"ccVelocity={ccVelocity} magnitude={ccVelocity.magnitude} AnimState={animState}", true, 1f);
 
             HandlePlayerInput(data);
         }
@@ -71,11 +99,17 @@ public class Player : NetworkBehaviour {
             logd(logId, $"Change: {change}");
             switch (change) {
                 case nameof(spawned):
-                    _material.color = Color.white;
+                    //_material.color = Color.white;
+                    _shotFX.Play();
                     break;
+                case nameof(animState):
+                    logd(logId, $"animState={_animState.ToString()}");
+                    _anim.Play(_animState.ToString());
+                    break;
+
             }
         }
-        _material.color = Color.Lerp(_material.color, Color.blue, Time.deltaTime);
+        //_material.color = Color.Lerp(_material.color, Color.blue, Time.deltaTime);
     }
     public void SpawnPhysxBall() {
         var logId = "SpawnPhysxBall";
