@@ -51,14 +51,20 @@ public class Player : NetworkBehaviour {
                 return;
             }
 
-            if (data.buttons.IsSet(NetworkInputData.MOUSEBUTTON0)) {
-                SpawnBall();
-            }
-            if (data.buttons.IsSet(NetworkInputData.MOUSEBUTTON1)) {
-                SpawnPhysxBall();
-            }
+            HandlePlayerInput(data);
         }
     }
+
+    public void HandlePlayerInput(NetworkInputData data) {
+        
+        if (data.buttons.IsSet(NetworkInputData.MOUSEBUTTON0)) {
+            SpawnBall();
+        }
+        if (data.buttons.IsSet(NetworkInputData.MOUSEBUTTON1)) {
+            SpawnPhysxBall();
+        }
+    }
+
     public override void Render() {
         var logId = "Render";
         foreach (var change in _changeDetector.DetectChanges(this)) {
