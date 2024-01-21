@@ -57,6 +57,8 @@ public class Player : NetworkBehaviour {
         if (GetInput(out NetworkInputData data)) {
             data.direction.Normalize();
 
+            _cc.braking = _cc.Grounded ? 20 : 0;
+
             _cc.Move(movementSpeed * data.direction * Runner.DeltaTime);
 
             if (data.direction.sqrMagnitude > 0) {
