@@ -56,6 +56,7 @@ public class Player : NetworkBehaviour {
 
         if (GetInput(out NetworkInputData data)) {
             data.direction.Normalize();
+
             _cc.Move(movementSpeed * data.direction * Runner.DeltaTime);
 
             if (data.direction.sqrMagnitude > 0) {
@@ -90,6 +91,9 @@ public class Player : NetworkBehaviour {
         }
         if (data.buttons.IsSet(NetworkInputData.MOUSEBUTTON1)) {
             SpawnPhysxBall();
+        }
+        if (data.buttons.IsSet(NetworkInputData.KEYCODE_SPACE)) {
+            _cc.Jump();
         }
     }
 

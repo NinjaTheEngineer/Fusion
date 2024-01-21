@@ -15,9 +15,11 @@ public class BasicSpawner : NinjaMonoBehaviour, INetworkRunnerCallbacks {
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     private bool _mouseButton0;
     private bool _mouseButton1;
+    private bool _spaceKey;
     void Update() {
         _mouseButton0 = _mouseButton0 | Input.GetMouseButton(0);
         _mouseButton1 = _mouseButton1 | Input.GetMouseButton(1);
+        _spaceKey = _spaceKey | Input.GetKeyDown(KeyCode.Space);
     }
     async void StartGame(GameMode mode) {
         // Create the Fusion runner and let it know that we will be providing user input
@@ -106,9 +108,11 @@ public class BasicSpawner : NinjaMonoBehaviour, INetworkRunnerCallbacks {
 
         data.buttons.Set(NetworkInputData.MOUSEBUTTON0, _mouseButton0);
         data.buttons.Set(NetworkInputData.MOUSEBUTTON1, _mouseButton1);
+        data.buttons.Set(NetworkInputData.KEYCODE_SPACE, _spaceKey);
 
         _mouseButton0 = false;
         _mouseButton1 = false;
+        _spaceKey = false;
 
         input.Set(data);
 
